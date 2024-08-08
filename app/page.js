@@ -39,7 +39,7 @@ export default function Home() {
     setPantry(pantryList)
   }
 
-  //good from here......
+
   useEffect( () => {
     updatePantry()
   }, [])
@@ -122,12 +122,14 @@ export default function Home() {
       </Modal>
       <Button 
         variant="contained" 
-        onClick={handleOpen}>
+        onClick={handleOpen}
+        style={{ width: '100px', height: '50px', fontSize: '20px' }}
+        >
         Add
       </Button>
       <Box border={'1px solid #333'}>
         <Box 
-          width="800px"  
+          width="1000px"  
           height="100px"
           bgcolor={'#5F9EA0'} 
           display={'flex'}
@@ -135,16 +137,16 @@ export default function Home() {
           flexDirection={'column'}  
           alignItems={'center'} 
         >
-          <Typography variant={'h2'} color={'white'} textAlign={'center'}>
+          <Typography variant={'h2'} color={'white'} textAlign={'center'} fontSize={'50px'}>
             Pantry Items
           </Typography>
         </Box>
-        <Stack width="800px" height="300px" spacing={2} overflow={'auto'}>
+        <Stack width="1000px" height="400px" spacing={1} overflow={'auto'}>
           {pantry.map(({name, count}) => ( 
             <Box
               key={name}
               width="100%"
-              minHeight="150px"
+              minHeight="100px"
               display={'flex'}
               justifyContent={'space-between'}
               alignItems={'center'}
@@ -153,17 +155,20 @@ export default function Home() {
             >
               <Typography
                 variant={'h3'}
-                color={'grey'}
+                color={'black'}
                 textAlign={'center'}
+                fontSize={45}
+                style={{ fontFamily: 'monospace' }} //font
               >
+                -{' '}
                 {
                   //Capitalize the first ketter of the item
                   name.charAt(0).toUpperCase() + name.slice(1)
                 }
               </Typography>
 
-              <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
-                Quantity: {count}
+              <Typography variant={'h3'} color={'grey'} textAlign={'center'} fontSize={30} style={{ fontFamily: 'monospace' }}>
+                {'('}Quantity: {count}{')'}
               </Typography>
 
             <Button variant="contained" onClick={() => removeItem(name)}>
