@@ -1,7 +1,7 @@
 'use client'
-import {Box, Stack, Typography, Button, Modal, TextField} from '@mui/material'
+import { Box, Stack, Typography, Button, Modal, TextField } from '@mui/material'
 import { firestore } from '@/firebase'
-import { collection, doc, query, setDoc, getDocs, deleteDoc, getDoc} from 'firebase/firestore'
+import { collection, doc, query, setDoc, getDocs, deleteDoc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
 const style = {
@@ -20,62 +20,62 @@ const style = {
 };
 
 export default function Home() {
-  const[pantry, setPantry] = useState([])
+  const [pantry, setPantry] = useState([])
+  const [filteredPantry, setFilteredPantry] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [open, setOpen] = useState(false)
+  const [itemName, setItemName] = useState('')
 
-  const[open, setOpen] = useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
 
-  const [itemName, setItemName] = useState('')
-
   const updatePantry = async () => {
-    const snapshot = query(collection(firestore, 'pantry'))
-    const docs = await getDocs(snapshot)
-    const pantryList = []
+    const snapshot = query(collection(firestore, 'pantry'));
+    const docs = await getDocs(snapshot);
+    const pantryList = [];
     docs.forEach((doc) => {
-      pantryList.push({name: doc.id, ...doc.data()})
-    }) 
-    console.log(pantryList)
-    setPantry(pantryList)
-  }
+      pantryList.push({ name: doc.id, ...doc.data() });
+    });
+    setPantry(pantryList);
+  };
 
-
-  useEffect( () => {
-    updatePantry()
+  useEffect(() => {
+    updatePantry();
   }, [])
 
+  useEffect(() => {
+    const results = pantry.filter(item => 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    setFilteredPantry(results)
+  }, [searchTerm, pantry])
+
   const addItem = async (item) => {
-
-    item = item.toLowerCase(); //lower/uppercase doesnt matter
-
-    const docRef = doc(collection(firestore, 'pantry'), item);
-
-    //Check if exists
+    item = item.toLowerCase() // lowercase/uppercase doesn't matter
+    const docRef = doc(collection(firestore, 'pantry'), item)
     const docSnap = await getDoc(docRef)
 
     if (docSnap.exists()) {
-      const {count} = docSnap.data()
-      await setDoc(docRef, {count: count + 1})
+      const { count } = docSnap.data()
+      await setDoc(docRef, { count: count + 1 })
     } else {
-      await setDoc(docRef, {count: 1})
+      await setDoc(docRef, { count: 1 })
     }
     await updatePantry()
-    
   }
 
   const removeItem = async (item) => {
     const docRef = doc(collection(firestore, 'pantry'), item)
     const docSnap = await getDoc(docRef)
     if (docSnap.exists()) {
-      const {count} = docSnap.data()
+      const { count } = docSnap.data()
       if (count === 1) {
         await deleteDoc(docRef)
       } else {
-        await setDoc(docRef, {count: count - 1})
+        await setDoc(docRef, { count: count - 1 })
       }
     }
     await updatePantry()
-    
   }
 
   return (
@@ -88,6 +88,13 @@ export default function Home() {
       alignItems={'center'}
       gap={2}
     >
+      <TextField 
+        label="Search Items" 
+        variant="outlined"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{ marginBottom: '20px', width: '300px' }}
+      />
       <Modal
         open={open}
         onClose={handleClose}
@@ -115,7 +122,7 @@ export default function Home() {
                 handleClose()
               }}
             >
-            Add
+              Add
             </Button>
           </Stack>
         </Box>
@@ -124,7 +131,7 @@ export default function Home() {
         variant="contained" 
         onClick={handleOpen}
         style={{ width: '100px', height: '50px', fontSize: '20px' }}
-        >
+      >
         Add
       </Button>
       <Box border={'1px solid #333'}>
@@ -142,7 +149,7 @@ export default function Home() {
           </Typography>
         </Box>
         <Stack width="1000px" height="400px" spacing={1} overflow={'auto'}>
-          {pantry.map(({name, count}) => ( 
+          {filteredPantry.map(({ name, count }) => (
             <Box
               key={name}
               width="100%"
@@ -158,26 +165,20 @@ export default function Home() {
                 color={'black'}
                 textAlign={'center'}
                 fontSize={45}
-                style={{ fontFamily: 'monospace' }} //font
+                style={{ fontFamily: 'monospace' }}
               >
-                -{' '}
-                {
-                  //Capitalize the first ketter of the item
-                  name.charAt(0).toUpperCase() + name.slice(1)
-                }
+                - {name.charAt(0).toUpperCase() + name.slice(1)}
               </Typography>
-
               <Typography variant={'h3'} color={'grey'} textAlign={'center'} fontSize={30} style={{ fontFamily: 'monospace' }}>
                 {'('}Quantity: {count}{')'}
               </Typography>
-
-            <Button variant="contained" onClick={() => removeItem(name)}>
-              Remove
-            </Button>
+              <Button variant="contained" onClick={() => removeItem(name)}>
+                Remove
+              </Button>
             </Box>
           ))}
         </Stack>
       </Box>
     </Box>
-  );
+  )
 }
